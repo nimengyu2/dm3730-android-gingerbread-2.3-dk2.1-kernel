@@ -31,6 +31,7 @@ struct sharp_data {
 	struct backlight_device *bl;
 };
 
+#if 0
 static struct omap_video_timings sharp_ls_timings = {
 	.x_res = 480,
 	.y_res = 640,
@@ -45,6 +46,24 @@ static struct omap_video_timings sharp_ls_timings = {
 	.vfp		= 1,
 	.vbp		= 1,
 };
+#endif
+
+#if 1
+static struct omap_video_timings sharp_ls_timings = {
+	.x_res = 800,
+	.y_res = 480,
+
+	.pixel_clock	= 33300,
+
+	.hsw		= 20,
+	.hfp		= 210,
+	.hbp		= 46,
+
+	.vsw		= 10,
+	.vfp		= 22,
+	.vbp		= 23,
+};
+#endif
 
 static int sharp_ls_bl_update_status(struct backlight_device *bl)
 {

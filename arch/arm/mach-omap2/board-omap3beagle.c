@@ -301,7 +301,8 @@ static struct omap2_hsmmc_info mmc[] = {
 	{
 		.mmc		= 1,
 		.caps		= MMC_CAP_4_BIT_DATA | MMC_CAP_8_BIT_DATA,
-		.gpio_wp	= 29,
+		//.gpio_wp	= 29,
+		.gpio_wp	= NULL,
 	},
 	{}	/* Terminator */
 };
@@ -332,7 +333,8 @@ static int beagle_twl_gpio_setup(struct device *dev,
 	} else if ((omap3_beagle_get_rev() == OMAP3BEAGLE_BOARD_C1_3) ||
 		(omap3_beagle_get_rev() == OMAP3BEAGLE_BOARD_C4)) {
 		omap_mux_init_gpio(23, OMAP_PIN_INPUT);
-		mmc[0].gpio_wp = 23;
+		//mmc[0].gpio_wp = 23;
+		mmc[0].gpio_wp = -EINVAL;
 	} else {
 		omap_mux_init_gpio(29, OMAP_PIN_INPUT);
 	}
