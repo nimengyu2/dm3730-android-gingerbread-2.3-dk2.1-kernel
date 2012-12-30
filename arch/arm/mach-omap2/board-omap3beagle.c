@@ -47,6 +47,9 @@
 #include <plat/nand.h>
 #include <plat/usb.h>
 
+#include <linux/lierda_debug.h>
+#include <linux/i2c/tsc2007.h> // Modify by nmy
+
 #include "mux.h"
 #include "hsmmc.h"
 #include "timer-gp.h"
@@ -535,6 +538,86 @@ static struct twl4030_platform_data beagle_twldata = {
 	.vaux4		= &beagle_vaux4,
 };
 
+
+//----------------------------------------------------------------------------//
+//  nmy add tsc2007 code   start  2010-12-10  14:00
+//----------------------------------------------------------------------------//
+
+/*
+ * TSC 2007 Support
+ */
+#define TSC2007_GPIO_IRQ_PIN_TMP	38
+#define TSC2007_GPIO_IRQ_PIN	162
+
+static int tsc2007_init_irq(void)
+{
+	int ret = 0;
+        //pr_warning("%s: lierda_tcs2007_init_irq %d\n", __func__, ret);
+#if 1
+	omap_mux_init_gpio(TSC2007_GPIO_IRQ_PIN_TMP, OMAP_PIN_INPUT_PULLUP);
+
+	ret = gpio_request(TSC2007_GPIO_IRQ_PIN_TMP, "tsc2007-irq-tmp");
+	if (ret < 0) {
+		printk("%s: failed to TSC2007 IRQ GPIO: %d\n", __func__, ret);
+		return ret;
+	}
+	else
+	{
+		printk("%s: ok to TSC2007 IRQ GPIO: %d\n", __func__, ret);
+	}
+
+	gpio_direction_input(TSC2007_GPIO_IRQ_PIN_TMP);
+
+
+	omap_mux_init_gpio(TSC2007_GPIO_IRQ_PIN, OMAP_PIN_INPUT_PULLUP);
+
+	ret = gpio_request(TSC2007_GPIO_IRQ_PIN, "tsc2007-irq");
+	if (ret < 0) {
+		printk("%s: failed to TSC2007 IRQ GPIO: %d\n", __func__, ret);
+		return ret;
+	}
+	else
+	{
+		printk("%s: ok to TSC2007 IRQ GPIO: %d\n", __func__, ret);
+	}
+
+	gpio_direction_input(TSC2007_GPIO_IRQ_PIN);
+
+#endif
+#if 0
+	omap_mux_init_gpio(TSC2007_GPIO_IRQ_PIN, OMAP_PIN_OUTPUT);
+	//omap_mux_init_signal("sdrc_cke0", OMAP_PIN_OUTPUT);
+	gpio_request(TSC2007_GPIO_IRQ_PIN, "tsc2007");
+	gpio_direction_output(TSC2007_GPIO_IRQ_PIN,1);
+	gpio_set_value(TSC2007_GPIO_IRQ_PIN,1);
+#endif
+	return ret;
+}
+
+static void tsc2007_exit_irq(void)
+{
+	gpio_free(TSC2007_GPIO_IRQ_PIN);
+}
+
+static int tsc2007_get_irq_level(void)
+{
+	//pr_warning("%s: lierda_tsc2007_get_irq_level %d\n", __func__, 0);
+	//lsd_ts_dbg(LSD_DBG,"enter tsc2007_get_irq_level\n");
+	return gpio_get_value(TSC2007_GPIO_IRQ_PIN) ? 0 : 1;
+}
+
+struct tsc2007_platform_data da850evm_tsc2007data = {
+	.model = 2007,
+	.x_plate_ohms = 180,
+	.get_pendown_state = tsc2007_get_irq_level,
+	.init_platform_hw = tsc2007_init_irq,
+	.exit_platform_hw = tsc2007_exit_irq,
+};
+
+//----------------------------------------------------------------------------//
+//  nmy add tsc2007 code   end  2010-12-10  14:00
+//----------------------------------------------------------------------------//
+
 static struct i2c_board_info __initdata beagle_i2c_boardinfo[] = {
 	{
 		I2C_BOARD_INFO("twl4030", 0x48),
@@ -550,13 +633,22 @@ static struct i2c_board_info __initdata beagle_i2c_eeprom[] = {
        },
 };
 
+static struct i2c_board_info __initdata beagle_i2c2[] = {
+	{
+	       I2C_BOARD_INFO("tsc2007", 0x48),
+	       .platform_data = &da850evm_tsc2007data,
+		.irq = OMAP_GPIO_IRQ(TSC2007_GPIO_IRQ_PIN),
+       },
+};
 static int __init omap3_beagle_i2c_init(void)
 {
 	omap_register_i2c_bus(1, 2600, beagle_i2c_boardinfo,
 			ARRAY_SIZE(beagle_i2c_boardinfo));
 
 	/* Bus 2 is used for Camera/Sensor interface */
-	omap_register_i2c_bus(2, 400, NULL, 0);
+	//omap_register_i2c_bus(2, 400, NULL, 0);
+	omap_register_i2c_bus(2, 400, beagle_i2c2, ARRAY_SIZE(beagle_i2c2));
+	
 
 	/* Bus 3 is attached to the DVI port where devices like the pico DLP
 	 * projector don't work reliably with 400kHz */
