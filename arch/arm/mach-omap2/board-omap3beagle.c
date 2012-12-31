@@ -838,7 +838,7 @@ static struct platform_device omap3sbc8100_plus_dm9000_device = {
         },
 };
 
-
+#if 1   // source configuration
 #define NET_GPMC_CONFIG1	0x00001000
 #define NET_GPMC_CONFIG2	0x001e1e00
 #define NET_GPMC_CONFIG3	0x00080300
@@ -846,6 +846,17 @@ static struct platform_device omap3sbc8100_plus_dm9000_device = {
 #define NET_GPMC_CONFIG5	0x04181f1f
 #define NET_GPMC_CONFIG6	0x00000FCF
 #define NET_GPMC_CONFIG7	0x00000f6c
+#endif
+
+#if 0  // 经过测试没有太大效果，下次再测试
+#define NET_GPMC_CONFIG1	0x00001000
+#define NET_GPMC_CONFIG2	0x000F0F00
+#define NET_GPMC_CONFIG3	0x00040100
+#define NET_GPMC_CONFIG4	0x0E040E04
+#define NET_GPMC_CONFIG5	0x020C1010
+#define NET_GPMC_CONFIG6	0x000007C7
+#define NET_GPMC_CONFIG7	0x00000f6c
+#endif
 
 #define GPMC_CS3 3
 
