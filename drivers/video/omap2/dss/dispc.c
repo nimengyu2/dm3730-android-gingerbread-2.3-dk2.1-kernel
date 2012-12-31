@@ -2474,7 +2474,8 @@ static void _dispc_set_pol_freq(bool onoff, bool rf, bool ieo, bool ipc,
 	l |= FLD_VAL(ivs, 12, 12);
 	l |= FLD_VAL(acbi, 11, 8);
 	l |= FLD_VAL(acb, 7, 0);
-
+	l |= (1 << 14);
+	printk("AAAAA:l=0x%08x\n",l);
 	enable_clocks(1);
 	dispc_write_reg(DISPC_POL_FREQ, l);
 	enable_clocks(0);
