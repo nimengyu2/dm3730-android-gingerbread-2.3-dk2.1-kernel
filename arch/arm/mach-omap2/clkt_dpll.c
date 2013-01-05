@@ -26,6 +26,7 @@
 #include "clock.h"
 #include "cm-regbits-24xx.h"
 #include "cm-regbits-34xx.h"
+#include <linux/lierda_debug.h>
 
 /* DPLL rate rounding: minimum DPLL multiplier, divider values */
 #define DPLL_MIN_MULTIPLIER		2
@@ -305,13 +306,22 @@ long omap2_dpll_round_rate(struct clk *clk, unsigned long target_rate)
 	unsigned long scaled_rt_rp, new_rate;
 	int min_e = -1, min_e_m = -1, min_e_n = -1;
 	struct dpll_data *dd;
+	lsd_clk_dbg(LSD_DBG,"enter omap2_dpll_round_rate\n");
 
 	if (!clk || !clk->dpll_data)
+	{
+		lsd_clk_dbg(LSD_ERR,"!clk || !clk->dpll_data\n");
 		return ~0;
-
+	}
+	else
+	{
+		lsd_clk_dbg(LSD_OK,"NO !clk || !clk->dpll_data\n");
+	}
 	dd = clk->dpll_data;
 
 	pr_debug("clock: starting DPLL round_rate for clock %s, target rate "
+		 "%ld\n", clk->name, target_rate);
+	lsd_clk_dbg(LSD_DBG,"clock: starting DPLL round_rate for clock %s, target rate "
 		 "%ld\n", clk->name, target_rate);
 
 	scaled_rt_rp = target_rate / (dd->clk_ref->rate / DPLL_SCALE_FACTOR);
@@ -350,6 +360,8 @@ long omap2_dpll_round_rate(struct clk *clk, unsigned long target_rate)
 		e = target_rate - new_rate;
 		pr_debug("clock: n = %d: m = %d: rate error is %d "
 			 "(new_rate = %ld)\n", n, m, e, new_rate);
+		lsd_clk_dbg(LSD_DBG,"clock: n = %d: m = %d: rate error is %d "
+			 "(new_rate = %ld)\n", n, m, e, new_rate);
 
 		if (min_e == -1 ||
 		    min_e >= (int)(abs(e) - dd->rate_tolerance)) {
@@ -358,6 +370,7 @@ long omap2_dpll_round_rate(struct clk *clk, unsigned long target_rate)
 			min_e_n = n;
 
 			pr_debug("clock: found new least error %d\n", min_e);
+			lsd_clk_dbg(LSD_DBG,"clock: found new least error %d\n", min_e);
 
 			/* We found good settings -- bail out now */
 			if (min_e <= dd->rate_tolerance)
@@ -366,7 +379,8 @@ long omap2_dpll_round_rate(struct clk *clk, unsigned long target_rate)
 	}
 
 	if (min_e < 0) {
-		pr_debug("clock: error: target rate or tolerance too low\n");
+		pr_debug("clock: error: target rate or tolerance too low\n");	
+		lsd_clk_dbg(LSD_DBG,"clock: error: target rate or tolerance too low\n");	
 		return ~0;
 	}
 
@@ -377,7 +391,12 @@ long omap2_dpll_round_rate(struct clk *clk, unsigned long target_rate)
 
 	pr_debug("clock: final least error: e = %d, m = %d, n = %d\n",
 		 min_e, min_e_m, min_e_n);
+	lsd_clk_dbg(LSD_DBG,"clock: final least error: e = %d, m = %d, n = %d\n",
+		 min_e, min_e_m, min_e_n);
+
 	pr_debug("clock: final rate: %ld  (target rate: %ld)\n",
+		 dd->last_rounded_rate, target_rate);
+	lsd_clk_dbg(LSD_DBG,"clock: final rate: %ld  (target rate: %ld)\n",
 		 dd->last_rounded_rate, target_rate);
 
 	return dd->last_rounded_rate;

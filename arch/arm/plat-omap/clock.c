@@ -10,6 +10,8 @@
  * it under the terms of the GNU General Public License version 2 as
  * published by the Free Software Foundation.
  */
+#undef DEBUG
+
 #include <linux/kernel.h>
 #include <linux/init.h>
 #include <linux/list.h>
@@ -21,6 +23,7 @@
 #include <linux/cpufreq.h>
 #include <linux/debugfs.h>
 #include <linux/io.h>
+#include <linux/lierda_debug.h>
 
 #include <plat/clock.h>
 
@@ -115,17 +118,36 @@ int clk_set_rate(struct clk *clk, unsigned long rate)
 {
 	unsigned long flags;
 	int ret = -EINVAL;
+	lsd_clk_dbg(LSD_DBG,"enter clk_set_rate\n");
 
 	if (clk == NULL || IS_ERR(clk))
+	{
+		lsd_clk_dbg(LSD_ERR,"clk is null\n");		
 		return ret;
-
+	}
+	else
+	{
+		lsd_clk_dbg(LSD_OK,"clk is ok\n");
+	}
 	spin_lock_irqsave(&clockfw_lock, flags);
 	if (arch_clock->clk_set_rate)
+	{
 		ret = arch_clock->clk_set_rate(clk, rate);
+		lsd_clk_dbg(LSD_OK,"clk_set_rate is not null,ret =%d\n",ret);
+	}
+	else
+	{
+		lsd_clk_dbg(LSD_ERR,"clk_set_rate is null\n");
+	}
 	if (ret == 0) {
 		if (clk->recalc)
 			clk->rate = clk->recalc(clk);
 		propagate_rate(clk);
+		lsd_clk_dbg(LSD_DBG,"ret == 0\n");
+	}
+	else
+	{
+		lsd_clk_dbg(LSD_DBG,"ret = %d\n",ret);
 	}
 	spin_unlock_irqrestore(&clockfw_lock, flags);
 

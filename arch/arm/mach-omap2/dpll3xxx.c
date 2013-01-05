@@ -17,7 +17,7 @@
  * it under the terms of the GNU General Public License version 2 as
  * published by the Free Software Foundation.
  */
-
+#undef DEBUG
 #include <linux/kernel.h>
 #include <linux/device.h>
 #include <linux/list.h>
@@ -30,6 +30,7 @@
 #include <plat/cpu.h>
 #include <plat/clock.h>
 #include <asm/clkdev.h>
+#include <linux/lierda_debug.h>
 
 #include "clock.h"
 #include "cm2xxx_3xxx.h"
@@ -428,16 +429,37 @@ int omap3_noncore_dpll_set_rate(struct clk *clk, unsigned long rate)
 	struct dpll_data *dd;
 	int ret;
 
+	lsd_clk_dbg(LSD_DBG,"enter func omap3_noncore_dpll_set_rate \n");
+
 	if (!clk || !rate)
+	{
+		lsd_clk_dbg(LSD_ERR,"clk err,or rate err,clk=0x%08x,rate=%d\n",clk,rate);
 		return -EINVAL;
+	}	
+	else
+	{
+		lsd_clk_dbg(LSD_OK,"clk ok,and rate ok,clk=0x%08x,rate=%d\n",clk,rate);
+	}
 
 	dd = clk->dpll_data;
 	if (!dd)
+	{
+		lsd_clk_dbg(LSD_ERR,"dpll_data is null\n");
 		return -EINVAL;
-
+	}
+	else
+	{
+		lsd_clk_dbg(LSD_OK,"dpll_data is not null\n");
+	}
 	if (rate == omap2_get_dpll_rate(clk))
+	{
+		lsd_clk_dbg(LSD_OK,"rate is some\n");
 		return 0;
-
+	}
+	else
+	{
+		lsd_clk_dbg(LSD_OK,"rate is not some\n");
+	}
 	/*
 	 * Ensure both the bypass and ref clocks are enabled prior to
 	 * doing anything; we need the bypass clock running to reprogram
@@ -449,16 +471,31 @@ int omap3_noncore_dpll_set_rate(struct clk *clk, unsigned long rate)
 	if (dd->clk_bypass->rate == rate &&
 	    (clk->dpll_data->modes & (1 << DPLL_LOW_POWER_BYPASS))) {
 		pr_debug("clock: %s: set rate: entering bypass.\n", clk->name);
+		lsd_clk_dbg(LSD_DBG,"clock: %s: set rate: entering bypass.\n", clk->name);
 
 		ret = _omap3_noncore_dpll_bypass(clk);
 		if (!ret)
 			new_parent = dd->clk_bypass;
 	} else {
 		if (dd->last_rounded_rate != rate)
+		{
+			lsd_clk_dbg(LSD_DBG,"dd->last_rounded_rate != rate\n");
 			omap2_dpll_round_rate(clk, rate);
-
+		}
+		else
+		{
+			lsd_clk_dbg(LSD_DBG,"dd->last_rounded_rate == rate\n");
+		}
+	
 		if (dd->last_rounded_rate == 0)
+		{
+			lsd_clk_dbg(LSD_ERR,"dd->last_rounded_rate == 0\n");
 			return -EINVAL;
+		}
+		else
+		{
+			lsd_clk_dbg(LSD_DBG,"dd->last_rounded_rate != 0\n");
+		}
 
 		/* No freqsel on OMAP4 and OMAP3630 */
 		if (!cpu_is_omap44xx() && !cpu_is_omap3630()) {
@@ -469,6 +506,8 @@ int omap3_noncore_dpll_set_rate(struct clk *clk, unsigned long rate)
 		}
 
 		pr_debug("clock: %s: set rate: locking rate to %lu.\n",
+			 clk->name, rate);
+		lsd_clk_dbg(LSD_DBG,"clock: %s: set rate: locking rate to %lu.\n",
 			 clk->name, rate);
 
 		ret = omap3_noncore_dpll_program(clk, dd->last_rounded_m,
@@ -493,6 +532,7 @@ int omap3_noncore_dpll_set_rate(struct clk *clk, unsigned long rate)
 	omap2_clk_disable(dd->clk_ref);
 	omap2_clk_disable(dd->clk_bypass);
 
+	lsd_clk_dbg(LSD_OK,"will be return 0\n");
 	return 0;
 }
 

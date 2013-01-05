@@ -13,6 +13,7 @@
  * published by the Free Software Foundation.
  */
 #undef DEBUG
+//#define DEBUG
 
 #include <linux/kernel.h>
 #include <linux/list.h>
@@ -32,6 +33,7 @@
 #include "cm2xxx_3xxx.h"
 #include "cm-regbits-24xx.h"
 #include "cm-regbits-34xx.h"
+#include <linux/lierda_debug.h>
 
 u8 cpu_mask;
 
@@ -424,19 +426,41 @@ int __init omap2_clk_switch_mpurate_at_boot(const char *mpurate_ck_name)
 {
 	struct clk *mpurate_ck;
 	int r;
-
+	lsd_clk_dbg(LSD_DBG,"enter func omap2_clk_switch_mpurate_at_boot\n");
+	
 	if (!mpurate)
+	{
+		lsd_clk_dbg(LSD_ERR,"mpurate is 0\n");
 		return -EINVAL;
+	}
+	else
+	{
+		lsd_clk_dbg(LSD_DBG,"mpurate is %d\n",mpurate);
+	}
 
 	mpurate_ck = clk_get(NULL, mpurate_ck_name);
 	if (WARN(IS_ERR(mpurate_ck), "Failed to get %s.\n", mpurate_ck_name))
+	{
+		lsd_clk_dbg(LSD_ERR,"Failed to get %s.\n", mpurate_ck_name);
 		return -ENOENT;
+	}
+	else
+	{
+		lsd_clk_dbg(LSD_OK,"success to get %s.\n", mpurate_ck_name);
+	}
 
 	r = clk_set_rate(mpurate_ck, mpurate);
 	if (IS_ERR_VALUE(r)) {
+		lsd_clk_dbg(LSD_ERR,"ck: %s: unable to set MPU rate to %d: %d\n",
+		     mpurate_ck->name, mpurate, r);
 		WARN(1, "clock: %s: unable to set MPU rate to %d: %d\n",
 		     mpurate_ck->name, mpurate, r);
 		return -EINVAL;
+	}
+	else
+	{
+		lsd_clk_dbg(LSD_OK,"ck: %s: sucess able to set MPU rate to %d: %d\n",
+		     mpurate_ck->name, mpurate, r);
 	}
 
 	calibrate_delay();

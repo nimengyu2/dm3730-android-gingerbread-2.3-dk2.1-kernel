@@ -38,6 +38,7 @@
  * mechanism.
  */
 #undef DEBUG
+//#define DEBUG
 
 #include <linux/kernel.h>
 #include <linux/errno.h>
