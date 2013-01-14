@@ -231,8 +231,8 @@ static void tsc2007_work(struct work_struct *work)
 
 		input_sync(input);
 		
-		printk("point(%4d,%4d), pressure (%4u)\n",
-			tc.x, tc.y, rt);
+		//printk("point(%4d,%4d), pressure (%4u)\n",
+		//	tc.x, tc.y, rt);
 		dev_dbg(&ts->client->dev, "point(%4d,%4d), pressure (%4u)\n",
 			tc.x, tc.y, rt);
 
