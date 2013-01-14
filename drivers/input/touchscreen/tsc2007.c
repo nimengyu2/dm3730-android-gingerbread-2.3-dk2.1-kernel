@@ -184,7 +184,8 @@ static void tsc2007_work(struct work_struct *work)
 	tsc2007_read_values(ts, &tc);
 
 	rt = tsc2007_calculate_pressure(ts, &tc);
-	if (rt > MAX_12BIT) {
+	//if (rt > MAX_12BIT) {
+	if (rt > 350) {
 		/*
 		 * Sample found inconsistent by debouncing or pressure is
 		 * beyond the maximum. Don't report it to user space,
@@ -205,12 +206,33 @@ static void tsc2007_work(struct work_struct *work)
 			ts->pendown = true;
 		}
 
+		long a0,a1,a2,a3,a4,a5,a6;
+		long x,y;
+		a0 = 13273;
+		a1 = 26;
+		a2 = -868124;
+		a3 = -51;
+		a4 = 8393;
+		a5 = -1366464;
+		a6 = 65536;
+
+		x=(int) tc.x;
+        	y=(int) tc.y;
+
+		//tc.x=(long) ((a2+(a0*x)+(a1*y))/a6);
+        	//tc.y=(long) ((a5+(a3*x)+(a4*y))/a6);	
+
+		tc.x=(long) (((a2+(a0*x)+(a1*y))/a6)*4096/800);
+        	tc.y=(long) (((a5+(a3*x)+(a4*y))/a6)*4096/480);	
+				
 		input_report_abs(input, ABS_X, tc.x);
 		input_report_abs(input, ABS_Y, tc.y);
 		input_report_abs(input, ABS_PRESSURE, rt);
 
 		input_sync(input);
-
+		
+		printk("point(%4d,%4d), pressure (%4u)\n",
+			tc.x, tc.y, rt);
 		dev_dbg(&ts->client->dev, "point(%4d,%4d), pressure (%4u)\n",
 			tc.x, tc.y, rt);
 
