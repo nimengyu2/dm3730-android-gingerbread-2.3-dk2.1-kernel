@@ -52,6 +52,7 @@ arch/arm/boot/compressed/vmlinux
 #
 !.gitignore
 !.mailmap
+!.config
 
 #
 # Generated include files
