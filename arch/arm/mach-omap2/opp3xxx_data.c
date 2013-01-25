@@ -24,19 +24,20 @@
 
 #include "omap_opp_data.h"
 
+// omap34xx opp定义
 static struct omap_opp_def __initdata omap34xx_opp_def_list[] = {
 	/* MPU OPP1 */
-	OPP_INITIALIZER("mpu", true, 125000000, 975000),
+	OPP_INITIALIZER("mpu", true, 125000000, 975000),   // 125mhz
 	/* MPU OPP2 */
-	OPP_INITIALIZER("mpu", true, 250000000, 1075000),
-	/* MPU OPP3 */
-	OPP_INITIALIZER("mpu", true, 500000000, 1200000),
+	OPP_INITIALIZER("mpu", true, 250000000, 1075000),   // 250mhz
+	/* MPU OPP3 */ 
+	OPP_INITIALIZER("mpu", true, 500000000, 1200000),   // 500mhz
 	/* MPU OPP4 */
-	OPP_INITIALIZER("mpu", true, 550000000, 1270000),
+	OPP_INITIALIZER("mpu", true, 550000000, 1270000),  // 550mhz
 	/* MPU OPP5 */
-	OPP_INITIALIZER("mpu", true, 600000000, 1350000),
+	OPP_INITIALIZER("mpu", true, 600000000, 1350000),  // 600mhz
 	/* MPU OPP6 */
-	OPP_INITIALIZER("mpu", false, 720000000, 1350000),
+	OPP_INITIALIZER("mpu", false, 720000000, 1350000), // 720mhz
 
 	/*
 	 * L3 OPP1 - 41.5 MHz is disabled because: The voltage for that OPP is
@@ -66,15 +67,16 @@ static struct omap_opp_def __initdata omap34xx_opp_def_list[] = {
 	OPP_INITIALIZER("iva", false, 520000000, 1350000),
 };
 
+// omap36xx的opp定义列表 dm3730属于这里
 static struct omap_opp_def __initdata omap36xx_opp_def_list[] = {
 	/* MPU OPP1 - OPP50 */
-	OPP_INITIALIZER("mpu", true,  300000000, 1012500),
+	OPP_INITIALIZER("mpu", true,  300000000, 1012500),  // 300mhz
 	/* MPU OPP2 - OPP100 */
-	OPP_INITIALIZER("mpu", true,  600000000, 1200000),
+	OPP_INITIALIZER("mpu", true,  600000000, 1200000),  // 600mhz
 	/* MPU OPP3 - OPP-Turbo */
-	OPP_INITIALIZER("mpu", true, 800000000, 1325000),
+	OPP_INITIALIZER("mpu", true, 800000000, 1325000),  // 800mhz
 	/* MPU OPP4 - OPP-SB */
-	OPP_INITIALIZER("mpu", true, 1000000000, 1375000),
+	OPP_INITIALIZER("mpu", true, 1000000000, 1375000),  // 1000mhz
 
 	/* L3 OPP1 - OPP50 */
 	OPP_INITIALIZER("l3_main", true, 100000000, 1000000),
@@ -94,7 +96,7 @@ static struct omap_opp_def __initdata omap36xx_opp_def_list[] = {
 
 /**
  * omap3_opp_enable_720Mhz() - Enable the OPP corresponding to 720MHz
- *
+ *  使能opp为720mhz
  * This function would be executed only if the silicon is capable of
  * running at the 720MHz.
  */
@@ -145,22 +147,26 @@ err:
 /**
  * omap3_opp_init() - initialize omap3 opp table
  */
+ // omap3的opp初始化
 static int __init omap3_opp_init(void)
 {
 	int r = -ENODEV;
 
+	// 如果cpu不是34xx，则返回
 	if (!cpu_is_omap34xx())
 		return r;
 
+	// 如果cpu是3630，则初始化3630的opp列表
 	if (cpu_is_omap3630())
 		r = omap_init_opp_table(omap36xx_opp_def_list,
 			ARRAY_SIZE(omap36xx_opp_def_list));
 	else {
+		// 如果不是3630，则初始化34xx的opp列表
 		r = omap_init_opp_table(omap34xx_opp_def_list,
 			ARRAY_SIZE(omap34xx_opp_def_list));
 
 		if (omap3_has_720mhz())
-			r = omap3_opp_enable_720Mhz();
+			r = omap3_opp_enable_720Mhz();  // 使能频率为720mhz
 	}
 
 	return r;

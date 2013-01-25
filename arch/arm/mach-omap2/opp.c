@@ -48,6 +48,7 @@ int __init omap_init_opp_table(struct omap_opp_def *opp_def,
 	 * Initialize only if not already initialized even if the previous
 	 * call failed, because, no reason we'd succeed again.
 	 */
+	 // 如果omap table已经初始化过了，则返回
 	if (omap_table_init)
 		return -EEXIST;
 	omap_table_init = 1;
@@ -62,6 +63,7 @@ int __init omap_init_opp_table(struct omap_opp_def *opp_def,
 				__func__, i);
 			return -EINVAL;
 		}
+		// 查找硬件名称
 		oh = omap_hwmod_lookup(opp_def->hwmod_name);
 		if (!oh || !oh->od) {
 			pr_warn("%s: no hwmod or odev for %s, [%d] "

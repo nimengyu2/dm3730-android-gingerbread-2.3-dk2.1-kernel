@@ -107,7 +107,7 @@ struct clksel {
  * @control_reg: register containing the DPLL mode bitfield
  * @enable_mask: mask of the DPLL mode bitfield in @control_reg
  * @rate_tolerance: maximum variance allowed from target rate (in Hz)
- * @last_rounded_rate: cache of the last rate result of omap2_dpll_round_rate()
+ * @last_rounded_rate: cache of the last rate result of omap2_dpll_round_rate()上一次四舍五入的频率
  * @last_rounded_m: cache of the last M result of omap2_dpll_round_rate()
  * @max_multiplier: maximum valid non-bypass multiplier value (actual)
  * @last_rounded_n: cache of the last N result of omap2_dpll_round_rate()
@@ -144,8 +144,8 @@ struct dpll_data {
 	void __iomem		*mult_div1_reg;
 	u32			mult_mask;
 	u32			div1_mask;
-	struct clk		*clk_bypass;
-	struct clk		*clk_ref;
+	struct clk		*clk_bypass;  // 指向旁路时钟输入的clk结构体
+	struct clk		*clk_ref;// 指向时钟参考的输入
 	void __iomem		*control_reg;
 	u32			enable_mask;
 	unsigned int		rate_tolerance;

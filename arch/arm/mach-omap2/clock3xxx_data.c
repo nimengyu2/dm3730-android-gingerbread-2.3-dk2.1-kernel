@@ -275,7 +275,7 @@ static struct dpll_data dpll1_dd = {
 	.mult_div1_reg	= OMAP_CM_REGADDR(MPU_MOD, OMAP3430_CM_CLKSEL1_PLL),
 	.mult_mask	= OMAP3430_MPU_DPLL_MULT_MASK,
 	.div1_mask	= OMAP3430_MPU_DPLL_DIV_MASK,
-	.clk_bypass	= &dpll1_fck,
+	.clk_bypass	= &dpll1_fck,  // 指向dpll1_fck结构体
 	.clk_ref	= &sys_ck,
 	.freqsel_mask	= OMAP3430_MPU_DPLL_FREQSEL_MASK,
 	.control_reg	= OMAP_CM_REGADDR(MPU_MOD, OMAP3430_CM_CLKEN_PLL),
@@ -294,13 +294,16 @@ static struct dpll_data dpll1_dd = {
 	.rate_tolerance = DEFAULT_DPLL_RATE_TOLERANCE
 };
 
+
+// 这个ck用于mpu的时钟，用于设定mpu的时钟
+// 比如dm3730使用的这个ck用于mpu_rate
 static struct clk dpll1_ck = {
 	.name		= "dpll1_ck",
 	.ops		= &clkops_null,
 	.parent		= &sys_ck,
-	.dpll_data	= &dpll1_dd,
+	.dpll_data	= &dpll1_dd,  // 这个是dpll的数据结构体
 	.round_rate	= &omap2_dpll_round_rate,
-	.set_rate	= &omap3_noncore_dpll_set_rate,
+	.set_rate	= &omap3_noncore_dpll_set_rate,  // 设定频率函数
 	.clkdm_name	= "dpll1_clkdm",
 	.recalc		= &omap3_dpll_recalc,
 };
@@ -3499,6 +3502,9 @@ int __init omap3xxx_clk_init(void)
 	else
 		dpll4_dd = dpll4_dd_34xx;
 
+	// 注意这里是dm3730使用的这个函数，注意这个函数中的变量arch_clock被很多地方使用
+	// 非常重要的一个变量
+	// 使用的结构体是omap2_clk_functions这个结构体
 	clk_init(&omap2_clk_functions);
 
 	for (c = omap3xxx_clks; c < omap3xxx_clks + ARRAY_SIZE(omap3xxx_clks);

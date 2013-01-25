@@ -87,7 +87,7 @@ static struct android_usb_platform_data android_usb_pdata = {
 	.serial_number	= "20100720",
 	.num_functions	= ARRAY_SIZE(usb_functions_all),
 };
-
+// android的usb设备驱动
 static struct platform_device androidusb_device = {
 	.name	= "android_usb",
 	.id	= -1,
@@ -95,7 +95,7 @@ static struct platform_device androidusb_device = {
 		.platform_data = &android_usb_pdata,
 	},
 };
-
+// 初始化gadget驱动
 static void omap3evm_android_gadget_init(void)
 {
 	platform_device_register(&androidusb_device);
@@ -120,21 +120,21 @@ enum {
 };
 
 static u8 omap3_beagle_version;
-
+// 返回beagle 版本号
 static u8 omap3_beagle_get_rev(void)
 {
 	return omap3_beagle_version;
 }
-
+// 初始化beagle版本号
 static void __init omap3_beagle_init_rev(void)
 {
 	int ret;
 	u16 beagle_rev = 0;
-
+	// 设定gpio为输入，根据这三个gpio的状态判断版本号
 	omap_mux_init_gpio(171, OMAP_PIN_INPUT_PULLUP);
 	omap_mux_init_gpio(172, OMAP_PIN_INPUT_PULLUP);
 	omap_mux_init_gpio(173, OMAP_PIN_INPUT_PULLUP);
-
+	// 请求gpio口
 	ret = gpio_request(171, "rev_id_0");
 	if (ret < 0)
 		goto fail0;
@@ -154,8 +154,10 @@ static void __init omap3_beagle_init_rev(void)
 	beagle_rev = gpio_get_value(171) | (gpio_get_value(172) << 1)
 			| (gpio_get_value(173) << 2);
 
+	// 根据读取的值判断版本号
 	switch (beagle_rev) {
 	case 7:
+		// beagle ax bx
 		printk(KERN_INFO "OMAP3 Beagle Rev: Ax/Bx\n");
 		omap3_beagle_version = OMAP3BEAGLE_BOARD_AXBX;
 		break;
@@ -176,6 +178,7 @@ static void __init omap3_beagle_init_rev(void)
 		omap3_beagle_version = OMAP3BEAGLE_BOARD_XM;
 		break;
 	default:
+		// unknown版本
 		printk(KERN_INFO "OMAP3 Beagle Rev: unknown %hd\n", beagle_rev);
 		omap3_beagle_version = OMAP3BEAGLE_BOARD_UNKN;
 	}
@@ -193,19 +196,21 @@ fail0:
 	return;
 }
 
+// nand分区
 static struct mtd_partition omap3beagle_nand_partitions[] = {
 	/* All the partition sizes are listed in terms of NAND block size */
+	// 所有的分区大小都是按照nand块的大小的倍数
 	{
 		.name		= "X-Loader",
 		.offset		= 0,
 		.size		= 4 * NAND_BLOCK_SIZE,
-		.mask_flags	= MTD_WRITEABLE,	/* force read-only */
+		.mask_flags	= MTD_WRITEABLE,	/* force read-only只读 */
 	},
 	{
 		.name		= "U-Boot",
 		.offset		= MTDPART_OFS_APPEND,	/* Offset = 0x80000 */
 		.size		= 15 * NAND_BLOCK_SIZE,
-		.mask_flags	= MTD_WRITEABLE,	/* force read-only */
+		.mask_flags	= MTD_WRITEABLE,	/* force read-only 只读*/
 	},
 	{
 		.name		= "U-Boot Env",
@@ -225,51 +230,56 @@ static struct mtd_partition omap3beagle_nand_partitions[] = {
 };
 
 /* DSS */
-
+// 使能dvi，通过一个io口操作
 static int beagle_enable_dvi(struct omap_dss_device *dssdev)
 {
-	if (gpio_is_valid(dssdev->reset_gpio))
-		gpio_set_value(dssdev->reset_gpio, 1);
+	if (gpio_is_valid(dssdev->reset_gpio))  // 如果复位引脚有效，则开始操作
+		gpio_set_value(dssdev->reset_gpio, 1);  // 设定gpio口为高
 
 	return 0;
 }
-
+// 使能dvi，通过一个io口来操作
 static void beagle_disable_dvi(struct omap_dss_device *dssdev)
 {
-	if (gpio_is_valid(dssdev->reset_gpio))
-		gpio_set_value(dssdev->reset_gpio, 0);
+	if (gpio_is_valid(dssdev->reset_gpio))  // 如果复位引脚有效，则开始操作
+		gpio_set_value(dssdev->reset_gpio, 0);  // 设定gpio口为低
 }
 
+// beagle dvi设备
 static struct omap_dss_device beagle_dvi_device = {
 	.type = OMAP_DISPLAY_TYPE_DPI,
 	.name = "dvi",
-	.driver_name = "generic_panel",
-	.phy.dpi.data_lines = 24,
-	.reset_gpio = -EINVAL,
+	.driver_name = "generic_panel",  // 驱动名称
+	.phy.dpi.data_lines = 24,   // 数据线个数
+	.reset_gpio = -EINVAL,  // 复位引脚无效
 	.platform_enable = beagle_enable_dvi,
 	.platform_disable = beagle_disable_dvi,
 };
 
+// tv设备
 static struct omap_dss_device beagle_tv_device = {
 	.name = "tv",
-	.driver_name = "venc",
+	.driver_name = "venc",  // 驱动名称
 	.type = OMAP_DISPLAY_TYPE_VENC,
 	.phy.venc.type = OMAP_DSS_VENC_TYPE_SVIDEO,
 };
 
+// dss设备
 static struct omap_dss_device *beagle_dss_devices[] = {
 	&beagle_dvi_device,
 	&beagle_tv_device,
 };
 
+// dss设备数据结构体
 static struct omap_dss_board_info beagle_dss_data = {
 	.num_devices = ARRAY_SIZE(beagle_dss_devices),
 	.devices = beagle_dss_devices,
 	.default_device = &beagle_dvi_device,
 };
 
+// 平台设备  dss设备
 static struct platform_device beagle_dss_device = {
-	.name          = "omapdss",
+	.name          = "omapdss", // 设备名
 	.id            = -1,
 	.dev            = {
 		.platform_data = &beagle_dss_data,
@@ -285,13 +295,13 @@ static struct regulator_consumer_supply beagle_vdvi_supply =
 static void __init beagle_display_init(void)
 {
 	int r;
-
+	// 请求复位引脚
 	r = gpio_request(beagle_dvi_device.reset_gpio, "DVI reset");
 	if (r < 0) {
 		printk(KERN_ERR "Unable to get DVI reset GPIO\n");
 		return;
 	}
-
+	// 设定为输出
 	gpio_direction_output(beagle_dvi_device.reset_gpio, 0);
 }
 
@@ -517,6 +527,7 @@ static struct twl4030_codec_data beagle_codec_data = {
 	.audio = &beagle_audio_data,
 };
 
+// twl4030设备平台数据
 static struct twl4030_platform_data beagle_twldata = {
 	.irq_base	= TWL4030_IRQ_BASE,
 	.irq_end	= TWL4030_IRQ_END,

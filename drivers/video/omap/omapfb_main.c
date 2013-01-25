@@ -89,6 +89,8 @@ static void omapdss_release(struct device *dev)
 }
 
 /* dummy device for clocks */
+// 注意这个是针对omap设备的，不是omap2设备的
+// 比如dm3730应该不是这里的
 static struct platform_device omapdss_device = {
 	.name		= "omapdss",
 	.id		= -1,

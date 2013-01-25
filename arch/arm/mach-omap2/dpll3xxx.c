@@ -421,6 +421,8 @@ void omap3_noncore_dpll_disable(struct clk *clk)
  * target rate if it hasn't been done already, then program and lock
  * the DPLL.  Returns -EINVAL upon error, or 0 upon success.
  */
+ // 注意这里的输入参数clk是dpll1_ck
+ // 然后输入参数rate是需要设定的速率
 int omap3_noncore_dpll_set_rate(struct clk *clk, unsigned long rate)
 {
 	struct clk *new_parent = NULL;
@@ -428,13 +430,17 @@ int omap3_noncore_dpll_set_rate(struct clk *clk, unsigned long rate)
 	struct dpll_data *dd;
 	int ret;
 
+	// 判断clk结构体和rate是否为空
 	if (!clk || !rate)
 		return -EINVAL;
 
+	// 获取dpll_data这个结构体
+	// 如果是dm3730的mpu速率设定的话，这里是dpll1_dd
 	dd = clk->dpll_data;
 	if (!dd)
 		return -EINVAL;
 
+	// 获取dpll的速率
 	if (rate == omap2_get_dpll_rate(clk))
 		return 0;
 
@@ -443,17 +449,22 @@ int omap3_noncore_dpll_set_rate(struct clk *clk, unsigned long rate)
 	 * doing anything; we need the bypass clock running to reprogram
 	 * the DPLL.
 	 */
+	 // 使能时钟
 	omap2_clk_enable(dd->clk_bypass);
 	omap2_clk_enable(dd->clk_ref);
 
+	// 如果是dm3730的mpu速率设定的话，则这里应该的dd->clk_bypass是dpll1_fck
+	// 
 	if (dd->clk_bypass->rate == rate &&
 	    (clk->dpll_data->modes & (1 << DPLL_LOW_POWER_BYPASS))) {
 		pr_debug("clock: %s: set rate: entering bypass.\n", clk->name);
 
+		// 
 		ret = _omap3_noncore_dpll_bypass(clk);
 		if (!ret)
 			new_parent = dd->clk_bypass;
 	} else {
+		// 
 		if (dd->last_rounded_rate != rate)
 			omap2_dpll_round_rate(clk, rate);
 

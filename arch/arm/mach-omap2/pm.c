@@ -337,10 +337,14 @@ exit:
 
 static void __init omap3_init_voltages(void)
 {
+	// 如果不是omap34xx，则返回，
+	// dm3730也是属于omap34xx的
 	if (!cpu_is_omap34xx())
 		return;
 
-	omap2_set_init_voltage("mpu", "dpll1_ck", mpu_dev);
+	// 设定初始化电压mpu
+	omap2_set_init_voltage("mpu", "dpll1_ck", mpu_dev);  
+	// 设定初始化电压core
 	omap2_set_init_voltage("core", "l3_ick", l3_dev);
 }
 

@@ -121,6 +121,10 @@ int clk_set_rate(struct clk *clk, unsigned long rate)
 
 	spin_lock_irqsave(&clockfw_lock, flags);
 	if (arch_clock->clk_set_rate)
+		// 这里的clk_set_rate调用的是函数
+		// 其中参数clk是dpll1_ck
+		// 其中参数rate是需要设定的速率
+		// 这里使用clk_set_rate函数是omap2_clk_set_rate
 		ret = arch_clock->clk_set_rate(clk, rate);
 	if (ret == 0) {
 		if (clk->recalc)
@@ -416,6 +420,7 @@ static int __init clk_disable_unused(void)
 late_initcall(clk_disable_unused);
 #endif
 
+// clk初始化  该函数被mach-omap2中文件调用
 int __init clk_init(struct clk_functions * custom_clocks)
 {
 	if (!custom_clocks) {

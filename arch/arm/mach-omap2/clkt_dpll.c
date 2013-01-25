@@ -285,6 +285,7 @@ int omap2_dpll_set_rate_tolerance(struct clk *clk, unsigned int tolerance)
 
 /**
  * omap2_dpll_round_rate - round a target rate for an OMAP DPLL
+ * 四舍五入一个目标速率针对omap的dpll
  * @clk: struct clk * for a DPLL
  * @target_rate: desired DPLL clock rate
  *

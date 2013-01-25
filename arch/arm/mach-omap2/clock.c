@@ -347,10 +347,10 @@ int omap2_clk_set_rate(struct clk *clk, unsigned long rate)
 	int ret = -EINVAL;
 
 	pr_debug("clock: set_rate for clock %s to rate %ld\n", clk->name, rate);
-
+	// 这里的clk结构体是dpll1_ck
 	/* dpll_ck, core_ck, virt_prcm_set; plus all clksel clocks */
 	if (clk->set_rate)
-		ret = clk->set_rate(clk, rate);
+		ret = clk->set_rate(clk, rate);  // 这里的set_rate函数指的是omap3_noncore_dpll_set_rate
 
 	return ret;
 }
@@ -420,6 +420,7 @@ void omap2_clk_disable_unused(struct clk *clk)
  * the rate, -ENOENT if the struct clk referred to by @mpurate_ck_name
  * cannot be found, or 0 upon success.
  */
+ // 在启动的时候设定mpurate
 int __init omap2_clk_switch_mpurate_at_boot(const char *mpurate_ck_name)
 {
 	struct clk *mpurate_ck;
@@ -427,8 +428,11 @@ int __init omap2_clk_switch_mpurate_at_boot(const char *mpurate_ck_name)
 
 	if (!mpurate)
 		return -EINVAL;
-
-	mpurate_ck = clk_get(NULL, mpurate_ck_name);
+	// 判断是否有mpuck名称
+	// 这里的名字是dpll1_ck 
+	// 因此这里的mpurate_ck是改名称的ck的结构体
+	// 世界这里获取的clk结构体是dpll1_ck
+	mpurate_ck = clk_get(NULL, mpurate_ck_name);   
 	if (WARN(IS_ERR(mpurate_ck), "Failed to get %s.\n", mpurate_ck_name))
 		return -ENOENT;
 
@@ -490,11 +494,12 @@ void __init omap2_clk_print_new_rates(const char *hfclkin_ck_name,
 
 /* Common data */
 
+// 该结构体用于omap2的时钟相关的函数
 struct clk_functions omap2_clk_functions = {
 	.clk_enable		= omap2_clk_enable,
 	.clk_disable		= omap2_clk_disable,
 	.clk_round_rate		= omap2_clk_round_rate,
-	.clk_set_rate		= omap2_clk_set_rate,
+	.clk_set_rate		= omap2_clk_set_rate,  // 设定频率
 	.clk_set_parent		= omap2_clk_set_parent,
 	.clk_disable_unused	= omap2_clk_disable_unused,
 #ifdef CONFIG_CPU_FREQ

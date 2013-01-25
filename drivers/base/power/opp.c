@@ -22,24 +22,25 @@
 #include <linux/rcupdate.h>
 #include <linux/opp.h>
 
+ 
 /*
  * Internal data structure organization with the OPP layer library is as
- * follows:
- * dev_opp_list (root)
- *	|- device 1 (represents voltage domain 1)
- *	|	|- opp 1 (availability, freq, voltage)
+ * follows:  内部数据结构体，被opp程序层次库使用
+ * dev_opp_list (root)  根
+ *	|- device 1 (represents voltage domain 1)  一个电压组
+ *	|	|- opp 1 (availability, freq, voltage)  可以获得的频率和电压
  *	|	|- opp 2 ..
  *	...	...
  *	|	`- opp n ..
- *	|- device 2 (represents the next voltage domain)
+ *	|- device 2 (represents the next voltage domain)   一个电压组
  *	...
- *	`- device m (represents mth voltage domain)
+ *	`- device m (represents mth voltage domain)  更多的电压组
  * device 1, 2.. are represented by dev_opp structure while each opp
  * is represented by the opp structure.
  */
 
 /**
- * struct opp - Generic OPP description structure
+ * struct opp - Generic OPP description structure  普通opp描述结构体
  * @node:	opp list node. The nodes are maintained throughout the lifetime
  *		of boot. It is expected only an optimal set of OPPs are
  *		added to the library by the SoC framework.
@@ -48,21 +49,21 @@
  *		are protected by the dev_opp_list_lock for integrity.
  *		IMPORTANT: the opp nodes should be maintained in increasing
  *		order.
- * @available:	true/false - marks if this OPP as available or not
- * @rate:	Frequency in hertz
- * @u_volt:	Nominal voltage in microvolts corresponding to this OPP
+ * @available:	true/false - marks if this OPP as available or not 标记是否可以获得
+ * @rate:	Frequency in hertz  频率，以hz为单位
+ * @u_volt:	Nominal voltage in microvolts corresponding to this OPP最小电压
  * @dev_opp:	points back to the device_opp struct this opp belongs to
- *
+ *                  指向本节点属于的device_opp结构体
  * This structure stores the OPP information for a given device.
  */
 struct opp {
 	struct list_head node;
 
-	bool available;
-	unsigned long rate;
-	unsigned long u_volt;
+	bool available;  // 该频率是否可以获得
+	unsigned long rate; // 频率
+	unsigned long u_volt; // 最小电压
 
-	struct device_opp *dev_opp;
+	struct device_opp *dev_opp;  // 所属的opp设备
 };
 
 /**
@@ -82,7 +83,7 @@ struct opp {
 struct device_opp {
 	struct list_head node;
 
-	struct device *dev;
+	struct device *dev;  // 所属的设备
 	struct list_head opp_list;
 };
 
@@ -544,7 +545,7 @@ out:
 }
 
 /**
- * opp_enable() - Enable a specific OPP
+ * opp_enable() - Enable a specific OPP  使能一个指定的opp
  * @dev:	device for which we do this operation
  * @freq:	OPP frequency to enable
  *

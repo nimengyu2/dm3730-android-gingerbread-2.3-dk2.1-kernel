@@ -44,7 +44,7 @@ struct clk {
 
 	int			usecount;
 
-	unsigned long		rate;
+	unsigned long		rate; // ËÙ¶È
 	unsigned long		flags;
 
 	void __iomem		*enable_reg;

@@ -494,6 +494,7 @@ static inline void dss_uninitialize_debugfs(void)
 #endif /* CONFIG_DEBUG_FS && CONFIG_OMAP2_DSS_DEBUG_SUPPORT */
 
 /* PLATFORM DEVICE */
+// 挂在omap dss设备
 static int omap_dss_probe(struct platform_device *pdev)
 {
 	struct omap_dss_board_info *pdata = pdev->dev.platform_data;
@@ -503,11 +504,13 @@ static int omap_dss_probe(struct platform_device *pdev)
 
 	core.pdev = pdev;
 
+	// 初始化特性
 	dss_features_init();
 
 	dss_init_overlay_managers(pdev);
 	dss_init_overlays(pdev);
 
+	// 获取时钟
 	r = dss_get_clocks();
 	if (r)
 		goto err_clocks;
@@ -518,11 +521,12 @@ static int omap_dss_probe(struct platform_device *pdev)
 	DSSDBG("initial ctx id %u\n", core.ctx_id);
 
 #ifdef CONFIG_FB_OMAP_BOOTLOADER_INIT
-	/* DISPC_CONTROL */
+	/* DISPC_CONTROL */  // 判断在bootloader的时候lcd是否初始化了
 	if (omap_readl(0x48050440) & 1)	/* LCD enabled? */
 		skip_init = 1;
 #endif
 
+	// 初始化dss
 	r = dss_init(skip_init);
 	if (r) {
 		DSSERR("Failed to initialize DSS\n");
@@ -708,12 +712,13 @@ static int omap_dss_resume(struct platform_device *pdev)
 	return dss_resume_all_devices();
 }
 
+// 这里的dss是针对omap2设备的，比如dm3730
 static struct platform_driver omap_dss_driver = {
-	.probe          = omap_dss_probe,
-	.remove         = omap_dss_remove,
-	.shutdown	= omap_dss_shutdown,
-	.suspend	= omap_dss_suspend,
-	.resume		= omap_dss_resume,
+	.probe          = omap_dss_probe,  // 挂载函数
+	.remove         = omap_dss_remove, // 移除函数
+	.shutdown	= omap_dss_shutdown,  // 关闭函数
+	.suspend	= omap_dss_suspend,  // 挂起函数
+	.resume		= omap_dss_resume,  // 恢复函数
 	.driver         = {
 		.name   = "omapdss",
 		.owner  = THIS_MODULE,

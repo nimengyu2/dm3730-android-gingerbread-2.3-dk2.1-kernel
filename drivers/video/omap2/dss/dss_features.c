@@ -134,16 +134,17 @@ static struct omap_dss_features omap2_dss_features = {
 };
 
 /* OMAP3 DSS Features */
+// omap3 的 dss 特性
 static struct omap_dss_features omap3_dss_features = {
-	.reg_fields = omap3_dss_reg_fields,
+	.reg_fields = omap3_dss_reg_fields,  // 寄存器区域
 	.num_reg_fields = ARRAY_SIZE(omap3_dss_reg_fields),
 
 	.has_feature	= FEAT_GLOBAL_ALPHA,
 
 	.num_mgrs = 2,
 	.num_ovls = 3,
-	.supported_displays = omap3_dss_supported_displays,
-	.supported_color_modes = omap3_dss_supported_color_modes,
+	.supported_displays = omap3_dss_supported_displays,  // 支持的显示器
+	.supported_color_modes = omap3_dss_supported_color_modes,  // 支持的颜色模式
 };
 
 /* Functions returning values related to a DSS feature */
@@ -184,6 +185,7 @@ void dss_feat_get_reg_field(enum dss_feat_reg_field id, u8 *start, u8 *end)
 
 void dss_features_init(void)
 {
+	// 根据是否是omap24xx
 	if (cpu_is_omap24xx())
 		omap_current_dss_features = &omap2_dss_features;
 	else

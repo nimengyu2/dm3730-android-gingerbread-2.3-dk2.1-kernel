@@ -92,6 +92,7 @@ static int __init omap3xxx_clk_arch_init(void)
 	if (!cpu_is_omap34xx())
 		return 0;
 
+	// 这里使用的是dpll1_ck
 	ret = omap2_clk_switch_mpurate_at_boot("dpll1_ck");
 	if (!ret)
 		omap2_clk_print_new_rates("osc_sys_ck", "core_ck", "arm_fck");
